@@ -1,0 +1,6 @@
+@Lab2Try2Famutdinov_HostAddress = http://localhost:5045
+
+GET {{Lab2Try2Famutdinov_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
