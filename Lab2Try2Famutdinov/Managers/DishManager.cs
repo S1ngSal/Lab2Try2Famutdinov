@@ -7,6 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Lab2Try2Famutdinov.Data;
+using Lab2Try2Famutdinov.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace Lab2Try2Famutdinov.Managers
 {
     public class DishManager
@@ -19,85 +23,54 @@ namespace Lab2Try2Famutdinov.Managers
         }
 
         // Получение всех блюд
-        public async Task<ActionResult<IEnumerable<Dish>>> GetDishesAsync()
+        public async Task<List<Dish>> GetDishesAsync()
         {
-            var dishes = await _context.Dish.ToListAsync();
-            return dishes;
+            return await _context.Dish.ToListAsync();
         }
 
-        // Получение конкретного блюда
-        public async Task<ActionResult<Dish>> GetDishAsync(int id)
+        // Получение блюда по ID
+        public async Task<Dish> GetDishAsync(int id)
         {
-            var dish = await _context.Dish.FindAsync(id);
-            if (dish == null)
-            {
-                return new ActionResult<Dish>(new NotFoundResult());
-            }
-            return dish;
+            return await _context.Dish
+                                 .Include(d => d.Orders) // Подключаем Orders для загрузки блюд в заказах
+                                 .FirstOrDefaultAsync(d => d.Id == id);
         }
 
-        // Добавление блюда
-        public async Task<ActionResult<Dish>> AddDishAsync(Dish dish)
+
+        // Создание нового блюда
+        public async Task<Dish> AddDishAsync(Dish dish)
         {
             _context.Dish.Add(dish);
             await _context.SaveChangesAsync();
-
-            // Передаем все четыре аргумента в CreatedAtActionResult
-            return new CreatedAtActionResult(
-                nameof(DishesController.GetDish),  // Название метода в контроллере
-                "Dishes",                          // Имя контроллера
-                new { id = dish.Id },              // Параметры маршрута (ID нового блюда)
-                dish                               // Возвращаем сам объект блюда
-            );
+            return dish;
         }
-
 
         // Обновление блюда
-        public async Task<IActionResult> UpdateDishAsync(int id, Dish dish)
-        {
-            if (id != dish.Id)
-            {
-                return new BadRequestResult();
-            }
-
-            _context.Entry(dish).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DishExists(id))
-                {
-                    return new NotFoundResult();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return new NoContentResult();
-        }
-
-        // Удаление блюда
-        public async Task<IActionResult> DeleteDishAsync(int id)
+        public async Task<Dish> UpdateDishAsync(int id, Dish updatedDish)
         {
             var dish = await _context.Dish.FindAsync(id);
             if (dish == null)
             {
-                return new NotFoundResult();
+                throw new Exception("Dish not found");
             }
 
-            _context.Dish.Remove(dish);
+            dish.Name = updatedDish.Name;
+            dish.Price = updatedDish.Price;
+            dish.IsAvailable = updatedDish.IsAvailable;
+
             await _context.SaveChangesAsync();
-            return new NoContentResult();
+
+            return dish;
         }
 
-        private bool DishExists(int id)
+        public async Task<List<Dish>> GetAvailableDishesSortedByPriceAsync()
         {
-            return _context.Dish.Any(e => e.Id == id);
+            return await _context.Dish
+                                 .Where(d => d.IsAvailable)  // Фильтрация по доступности
+                                 .OrderBy(d => d.Price)      // Сортировка по цене
+                                 .ToListAsync();
         }
+
     }
 }
+

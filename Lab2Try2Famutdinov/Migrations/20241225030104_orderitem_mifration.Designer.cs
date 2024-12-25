@@ -4,6 +4,7 @@ using Lab2Try2Famutdinov.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lab2Try2Famutdinov.Migrations
 {
     [DbContext(typeof(Lab2Try2FamutdinovContext))]
-    partial class Lab2Try2FamutdinovContextModelSnapshot : ModelSnapshot
+    [Migration("20241225030104_orderitem_mifration")]
+    partial class orderitem_mifration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -127,7 +130,7 @@ namespace Lab2Try2Famutdinov.Migrations
                     b.Property<float>("DishPrice")
                         .HasColumnType("real");
 
-                    b.Property<int?>("OrderId")
+                    b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -151,7 +154,9 @@ namespace Lab2Try2Famutdinov.Migrations
                 {
                     b.HasOne("Lab2Try2Famutdinov.Models.Order", null)
                         .WithMany("OrderItems")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Lab2Try2Famutdinov.Models.Dish", b =>

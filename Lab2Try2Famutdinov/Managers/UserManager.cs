@@ -50,16 +50,42 @@ namespace Lab2Try2Famutdinov.Managers
 
             _context.User.Add(user);
             await _context.SaveChangesAsync();
-
-            // Используем правильный конструктор CreatedAtActionResult с четырьмя аргументами
             return new CreatedAtActionResult(
-                nameof(UsersController.GetUser),  // Название метода, который будет вызван (например, GetUser)
-                "Users",                          // Имя контроллера, в котором находится метод
-                new { id = user.Id },             // Параметры маршрута (ID нового пользователя)
-                user                              // Сам объект пользователя
+            nameof(UsersController.GetUser),  // Имя метода контроллера, который будет обрабатывать запрос
+            "Users",                          // Имя контроллера
+            new { id = user.Id },             // Параметры маршрута (ID нового пользователя)
+            user                              // Сам объект пользователя
             );
         }
 
+        // Обновление пользователя
+        public async Task<IActionResult> UpdateUserAsync(int id, User user)
+        {
+            if (id != user.Id)
+            {
+                return new BadRequestResult();
+            }
+
+            _context.Entry(user).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.User.Any(e => e.Id == id))
+                {
+                    return new NotFoundResult();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return new NoContentResult();
+        }
 
         // Удаление пользователя
         public async Task<IActionResult> DeleteUserAsync(int id)
@@ -75,26 +101,12 @@ namespace Lab2Try2Famutdinov.Managers
             return new NoContentResult();
         }
 
-        // Фильтрация клиентов по телефону
-        public IActionResult GetCustomersByPhone(string phone)
+        public async Task<List<User>> GetUsersWithOrdersAsync()
         {
-            var customers = _context.User
-                .AsEnumerable()
-                .Where(u => u.IsCustomer() && u.Phone.Contains(phone))
-                .ToList();
-
-            return new OkObjectResult(customers);
+            return await _context.User
+                                 .Where(u => _context.Order.Any(o => o.UserId == u.Id)) // Проверяем наличие заказов у пользователя
+                                 .ToListAsync();
         }
 
-        // Фильтрация администраторов по email
-        public IActionResult GetAdminsByEmail(string emailPart)
-        {
-            var admins = _context.User
-                .AsEnumerable()
-                .Where(u => u.IsAdmin() && u.Email.Contains(emailPart))
-                .ToList();
-
-            return new OkObjectResult(admins);
-        }
     }
 }

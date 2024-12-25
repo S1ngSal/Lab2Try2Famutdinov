@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using Lab2Try2Famutdinov.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Lab2Try2Famutdinov.Data;
-using Lab2Try2Famutdinov.Models;
+using Microsoft.AspNetCore.Authorization;
+using Lab2Try2Famutdinov.Managers;
 
 namespace Lab2Try2Famutdinov.Controllers
 {
@@ -14,115 +12,62 @@ namespace Lab2Try2Famutdinov.Controllers
     [ApiController]
     public class DishesController : ControllerBase
     {
-        private readonly Lab2Try2FamutdinovContext _context;
+        private readonly DishManager _dishManager;
 
-        public DishesController(Lab2Try2FamutdinovContext context)
+        public DishesController(DishManager dishManager)
         {
-            _context = context;
+            _dishManager = dishManager;
         }
 
         // GET: api/Dishes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Dish>>> GetDishes()
         {
-            return await _context.Dish.ToListAsync();
+            var dishes = await _dishManager.GetDishesAsync();
+            return Ok(dishes);  // Оборачиваем результат в Ok(), который возвращает статус 200 и данные.
         }
 
         // GET: api/Dishes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Dish>> GetDish(int id)
         {
-            var dish = await _context.Dish.FindAsync(id);
-
+            var dish = await _dishManager.GetDishAsync(id);
             if (dish == null)
             {
-                return NotFound();
+                return NotFound();  // Если блюдо не найдено, возвращаем статус 404.
             }
-
-            return dish;
+            return Ok(dish);  // Если блюдо найдено, возвращаем его с статусом 200.
         }
 
-        // POST: api/Dishes (только для администраторов)
+        // POST: api/Dishes/AddDish
+        [Authorize(Roles = "admin")]
         [HttpPost("AddDish")]
-        public async Task<ActionResult<Dish>> AddDish([FromBody] Dish dish, [FromHeader] string role)
+        public async Task<ActionResult<Dish>> AddDish([FromBody] Dish dish)
         {
-            if (string.IsNullOrEmpty(role) || !role.Equals("Admin", System.StringComparison.OrdinalIgnoreCase))
-            {
-                return Forbid("Только администратор может добавлять блюда.");
-            }
-
-            _context.Dish.Add(dish);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetDish), new { id = dish.Id }, dish);
+            var createdDish = await _dishManager.AddDishAsync(dish);
+            return CreatedAtAction(nameof(GetDish), new { id = createdDish.Id }, createdDish);  // Возвращаем статус 201 и созданное блюдо.
         }
 
         // PUT: api/Dishes/5
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDish(int id, Dish dish)
+        public async Task<IActionResult> PutDish(int id, [FromBody] Dish dish)
         {
-            if (id != dish.Id)
+            var updatedDish = await _dishManager.UpdateDishAsync(id, dish);
+            if (updatedDish == null)
             {
-                return BadRequest();
+                return NotFound();  // Если блюдо не найдено, возвращаем статус 404.
             }
-
-            _context.Entry(dish).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DishExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return NoContent();  // Возвращаем статус 204, если обновление прошло успешно.
         }
 
-        // DELETE: api/Dishes/5 (только для администраторов)
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDish(int id, [FromHeader] string role)
+        // GET: api/Dishes/AvailableSortedByPrice
+        [HttpGet("AvailableSortedByPrice")]
+        public async Task<ActionResult<IEnumerable<Dish>>> GetAvailableDishesSortedByPrice()
         {
-            if (string.IsNullOrEmpty(role) || !role.Equals("Admin", System.StringComparison.OrdinalIgnoreCase))
-            {
-                return Forbid("Только администратор может удалять блюда.");
-            }
-
-            var dish = await _context.Dish.FindAsync(id);
-            if (dish == null)
-            {
-                return NotFound();
-            }
-
-            _context.Dish.Remove(dish);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var dishes = await _dishManager.GetAvailableDishesSortedByPriceAsync();
+            return Ok(dishes);  // Возвращаем результат в формате 200 OK.
         }
 
-        // GET: api/Dishes/Available — получение только доступных блюд
-        [HttpGet("Available")]
-        public async Task<ActionResult<IEnumerable<Dish>>> GetAvailableDishes()
-        {
-            var availableDishes = await _context.Dish
-                .Where(d => d.IsAvailable)
-                .ToListAsync();
-
-            return Ok(availableDishes);
-        }
-
-        private bool DishExists(int id)
-        {
-            return _context.Dish.Any(e => e.Id == id);
-        }
     }
 }
-

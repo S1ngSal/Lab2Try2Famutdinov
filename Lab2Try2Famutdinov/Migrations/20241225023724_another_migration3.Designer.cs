@@ -4,6 +4,7 @@ using Lab2Try2Famutdinov.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lab2Try2Famutdinov.Migrations
 {
     [DbContext(typeof(Lab2Try2FamutdinovContext))]
-    partial class Lab2Try2FamutdinovContextModelSnapshot : ModelSnapshot
+    [Migration("20241225023724_another_migration3")]
+    partial class another_migration3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,6 +75,32 @@ namespace Lab2Try2Famutdinov.Migrations
                     b.ToTable("Order");
                 });
 
+            modelBuilder.Entity("Lab2Try2Famutdinov.Models.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DishId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DishId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderItem");
+                });
+
             modelBuilder.Entity("Lab2Try2Famutdinov.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -109,37 +138,6 @@ namespace Lab2Try2Famutdinov.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("OrderItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DishId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DishName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("DishPrice")
-                        .HasColumnType("real");
-
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("OrderItem");
-                });
-
             modelBuilder.Entity("Lab2Try2Famutdinov.Models.Order", b =>
                 {
                     b.HasOne("Lab2Try2Famutdinov.Models.Dish", null)
@@ -147,11 +145,19 @@ namespace Lab2Try2Famutdinov.Migrations
                         .HasForeignKey("DishId");
                 });
 
-            modelBuilder.Entity("OrderItem", b =>
+            modelBuilder.Entity("Lab2Try2Famutdinov.Models.OrderItem", b =>
                 {
+                    b.HasOne("Lab2Try2Famutdinov.Models.Dish", "Dish")
+                        .WithMany()
+                        .HasForeignKey("DishId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Lab2Try2Famutdinov.Models.Order", null)
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId");
+
+                    b.Navigation("Dish");
                 });
 
             modelBuilder.Entity("Lab2Try2Famutdinov.Models.Dish", b =>

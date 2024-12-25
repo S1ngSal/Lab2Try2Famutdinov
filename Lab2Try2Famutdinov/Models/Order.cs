@@ -2,21 +2,16 @@
 {
     public class Order
     {
-        public int Id { get; set; } // Уникальный идентификатор заказа
-        public int UserId { get; set; } // Идентификатор клиента, сделавшего заказ
-        public List<Dish> Dishes { get; set; } // Список блюд в заказе
-        public float TotalPrice { get; set; } // Общая стоимость заказа
-        public DateTime OrderDate { get; set; } // Дата и время заказа
+        public int Id { get; set; } // Идентификатор заказа
+        public int UserId { get; set; } // Идентификатор пользователя
+        public List<OrderItem> OrderItems { get; set; } // Список позиций (блюд) в заказе
+        public float TotalPrice { get; set; } // Общая стоимость
+        public DateTime OrderDate { get; set; } // Дата заказа
 
         public Order()
         {
-            Dishes = new List<Dish>();
-            OrderDate = DateTime.Now; // Устанавливаем текущую дату и время
+            OrderItems = new List<OrderItem>(); // Инициализация коллекции позиций заказа
         }
 
-        public void CalculateTotalPrice()
-        {
-            TotalPrice = Dishes.Sum(d => d.Price); // Суммируем цены всех блюд
-        }
     }
 }

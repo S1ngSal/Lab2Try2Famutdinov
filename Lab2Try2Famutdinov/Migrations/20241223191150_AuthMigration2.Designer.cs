@@ -4,6 +4,7 @@ using Lab2Try2Famutdinov.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lab2Try2Famutdinov.Migrations
 {
     [DbContext(typeof(Lab2Try2FamutdinovContext))]
-    partial class Lab2Try2FamutdinovContextModelSnapshot : ModelSnapshot
+    [Migration("20241223191150_AuthMigration2")]
+    partial class AuthMigration2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,10 +40,15 @@ namespace Lab2Try2Famutdinov.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
                     b.Property<float>("Price")
                         .HasColumnType("real");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
 
                     b.ToTable("Dish");
                 });
@@ -53,9 +61,6 @@ namespace Lab2Try2Famutdinov.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("DishId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
@@ -66,8 +71,6 @@ namespace Lab2Try2Famutdinov.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DishId");
 
                     b.ToTable("Order");
                 });
@@ -92,11 +95,11 @@ namespace Lab2Try2Famutdinov.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
+                    b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -109,59 +112,16 @@ namespace Lab2Try2Famutdinov.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("OrderItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DishId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DishName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("DishPrice")
-                        .HasColumnType("real");
-
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("OrderItem");
-                });
-
-            modelBuilder.Entity("Lab2Try2Famutdinov.Models.Order", b =>
-                {
-                    b.HasOne("Lab2Try2Famutdinov.Models.Dish", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("DishId");
-                });
-
-            modelBuilder.Entity("OrderItem", b =>
+            modelBuilder.Entity("Lab2Try2Famutdinov.Models.Dish", b =>
                 {
                     b.HasOne("Lab2Try2Famutdinov.Models.Order", null)
-                        .WithMany("OrderItems")
+                        .WithMany("Dishes")
                         .HasForeignKey("OrderId");
                 });
 
-            modelBuilder.Entity("Lab2Try2Famutdinov.Models.Dish", b =>
-                {
-                    b.Navigation("Orders");
-                });
-
             modelBuilder.Entity("Lab2Try2Famutdinov.Models.Order", b =>
                 {
-                    b.Navigation("OrderItems");
+                    b.Navigation("Dishes");
                 });
 #pragma warning restore 612, 618
         }

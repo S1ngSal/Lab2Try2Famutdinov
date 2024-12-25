@@ -4,6 +4,7 @@ using Lab2Try2Famutdinov.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lab2Try2Famutdinov.Migrations
 {
     [DbContext(typeof(Lab2Try2FamutdinovContext))]
-    partial class Lab2Try2FamutdinovContextModelSnapshot : ModelSnapshot
+    [Migration("20241225031158_orderitem_mifration2")]
+    partial class orderitem_mifration2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

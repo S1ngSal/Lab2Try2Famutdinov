@@ -17,5 +17,6 @@ namespace Lab2Try2Famutdinov.Data
         public DbSet<Lab2Try2Famutdinov.Models.Dish> Dish { get; set; } = default!;
         public DbSet<Lab2Try2Famutdinov.Models.Order> Order { get; set; } = default!;
         public DbSet<Lab2Try2Famutdinov.Models.User> User { get; set; } = default!;
+
     }
 }
